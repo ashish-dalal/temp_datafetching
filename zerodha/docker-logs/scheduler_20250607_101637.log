@@ -1,0 +1,15 @@
+2025-06-07 10:16:37,173 - ZerodhaScheduler - INFO - Zerodha Scheduler starting...
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - Current IST time: 2025-06-07 10:16:37
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - TESTING MODE: Skipping all waiting logic, running connector immediately
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - TESTING MODE: Skipping token renewal
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - TESTING MODE: Starting data collection immediately for 1 hour
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - Starting data collection for 1.0 hours...
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - Data collection will run until 11:16:37
+2025-06-07 10:16:37,174 - ZerodhaScheduler - INFO - Started process with PID: 7
+2025-06-07 10:16:39,179 - ZerodhaScheduler - ERROR - Process exited immediately with code: 1
+2025-06-07 10:16:39,180 - ZerodhaScheduler - ERROR - STDOUT: ERROR: .env file not found at /.env
+
+2025-06-07 10:16:39,180 - ZerodhaScheduler - ERROR - STDERR: No stderr
+2025-06-07 10:16:39,181 - ZerodhaScheduler - ERROR - Data collection failed
+2025-06-07 10:16:39,181 - ZerodhaScheduler - INFO - TESTING MODE: Test completed, exiting...
+2025-06-07 10:16:39,182 - ZerodhaScheduler - INFO - Zerodha Scheduler stopped

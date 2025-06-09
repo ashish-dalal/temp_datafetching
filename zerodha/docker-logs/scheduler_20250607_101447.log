@@ -1,0 +1,10 @@
+2025-06-07 10:14:47,791 - ZerodhaScheduler - INFO - Zerodha Scheduler starting...
+2025-06-07 10:14:47,791 - ZerodhaScheduler - INFO - Current IST time: 2025-06-07 10:14:47
+2025-06-07 10:14:47,791 - ZerodhaScheduler - INFO - TESTING MODE: Skipping all waiting logic, running connector immediately
+2025-06-07 10:14:47,791 - ZerodhaScheduler - INFO - TESTING MODE: Skipping token renewal
+2025-06-07 10:14:47,791 - ZerodhaScheduler - INFO - TESTING MODE: Starting data collection immediately for 1 hour
+2025-06-07 10:14:47,792 - ZerodhaScheduler - INFO - Starting data collection for 1.0 hours...
+2025-06-07 10:14:47,792 - ZerodhaScheduler - INFO - Data collection will run until 11:14:47
+2025-06-07 10:14:48,795 - ZerodhaScheduler - INFO - Data collection completed successfully
+2025-06-07 10:14:48,796 - ZerodhaScheduler - INFO - TESTING MODE: Test completed, exiting...
+2025-06-07 10:14:48,796 - ZerodhaScheduler - INFO - Zerodha Scheduler stopped

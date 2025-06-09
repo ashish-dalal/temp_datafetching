@@ -1,0 +1,16 @@
+2025-06-07 10:28:45,446 - ZerodhaScheduler - INFO - Zerodha Scheduler starting...
+2025-06-07 10:28:45,446 - ZerodhaScheduler - INFO - Current IST time: 2025-06-07 10:28:45
+2025-06-07 10:28:45,447 - ZerodhaScheduler - INFO - TESTING MODE: Skipping all waiting logic, running connector immediately
+2025-06-07 10:28:45,447 - ZerodhaScheduler - INFO - TESTING MODE: Skipping token renewal
+2025-06-07 10:28:45,447 - ZerodhaScheduler - INFO - TESTING MODE: Starting data collection immediately for 1 hour
+2025-06-07 10:28:45,447 - ZerodhaScheduler - INFO - Starting data collection for 1.0 hours...
+2025-06-07 10:28:45,448 - ZerodhaScheduler - INFO - Data collection will run until 11:28:45
+2025-06-07 10:28:45,448 - ZerodhaScheduler - INFO - Started process with PID: 6
+2025-06-07 10:28:47,453 - ZerodhaScheduler - ERROR - Process exited immediately with code: 1
+2025-06-07 10:28:47,454 - ZerodhaScheduler - ERROR - STDOUT: No stdout
+2025-06-07 10:28:47,455 - ZerodhaScheduler - ERROR - STDERR: INFO:__main__:Starting Zerodha data connector...
+ERROR:__main__:Unexpected error: Incorrect `api_key` or `access_token`.
+
+2025-06-07 10:28:47,455 - ZerodhaScheduler - ERROR - Data collection failed
+2025-06-07 10:28:47,455 - ZerodhaScheduler - INFO - TESTING MODE: Test completed, exiting...
+2025-06-07 10:28:47,455 - ZerodhaScheduler - INFO - Zerodha Scheduler stopped

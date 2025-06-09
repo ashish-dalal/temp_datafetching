@@ -1,0 +1,30 @@
+# Process termination settings
+timeouts:
+  process_shutdown: 15      # Seconds to wait for graceful shutdown before force kill
+  token_validation: 5       # Seconds to wait after token renewal to verify success
+  
+# Retry and error handling
+retry:
+  max_attempts: 5           # Maximum retry attempts for token renewal before urgent alerts
+  urgent_alert_interval: 5  # Seconds between urgent failure alert messages
+  
+# Scheduling configuration  
+scheduling:
+  renewal_cycle: 86355      # Seconds between token renewals (23h 59m 15s)
+  
+# Script file paths
+paths:
+  binance_script: "binance/run_connector.py"
+  zerodha_script: "zerodha/zerodha_run_connector.py" 
+  listener_script: "zerodha/listner.py"
+  token_script: "zerodha/zerodha_token_automation.py"
+  
+# Logging configuration
+logging:
+  level: "DEBUG"             # Log level: DEBUG, INFO, WARNING, ERROR
+  max_file_size: 104857600  # Maximum log file size in bytes (100MB)
+  
+# Health monitoring
+health:
+  check_interval: 30        # Seconds between process health checks
+  memory_limit_mb: 2048     # Memory limit per process before restart warning
