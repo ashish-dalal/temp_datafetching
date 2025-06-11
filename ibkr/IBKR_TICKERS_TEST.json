@@ -1,0 +1,32 @@
+{
+  "AAPL": {
+    "SYMBOL": "AAPL",
+    "secType": "STK",
+    "EXCHANGE": "SMART",
+    "CURRENCY": "USD"
+  },
+  "MSFT": {
+    "SYMBOL": "MSFT",
+    "secType": "STK", 
+    "EXCHANGE": "SMART",
+    "CURRENCY": "USD"
+  },
+  "GOOGL": {
+    "SYMBOL": "GOOGL",
+    "secType": "STK",
+    "EXCHANGE": "SMART", 
+    "CURRENCY": "USD"
+  },
+  "TSLA": {
+    "SYMBOL": "TSLA",
+    "secType": "STK",
+    "EXCHANGE": "SMART",
+    "CURRENCY": "USD"
+  },
+  "NVDA": {
+    "SYMBOL": "NVDA", 
+    "secType": "STK",
+    "EXCHANGE": "SMART",
+    "CURRENCY": "USD"
+  }
+}
