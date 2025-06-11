@@ -1,0 +1,4 @@
+aiohttp==3.8.6
+websockets==12.0
+questdb==2.0.4
+python-dotenv==1.0.0 

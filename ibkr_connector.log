@@ -1,0 +1,8 @@
+2025-06-10 03:17:31 - ibkr_questdb - INFO - Starting IBKR to QuestDB connector...
+2025-06-10 03:17:31 - ibkr_questdb - INFO - Connected to QuestDB ILP at qdb2.twocc.in:443
+2025-06-10 03:17:51 - ibkr_questdb - ERROR - Error creating table stocks_ticks: HTTPSConnectionPool(host='qdb2.twocc.in', port=9000): Max retries exceeded with url: /exec (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x104531a50>, 'Connection to qdb2.twocc.in timed out. (connect timeout=5)'))
+2025-06-10 03:18:11 - ibkr_questdb - ERROR - Error creating table stocks_bars: HTTPSConnectionPool(host='qdb2.twocc.in', port=9000): Max retries exceeded with url: /exec (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x104531720>, 'Connection to qdb2.twocc.in timed out. (connect timeout=5)'))
+2025-06-10 03:18:31 - ibkr_questdb - ERROR - Error listing tables: HTTPSConnectionPool(host='qdb2.twocc.in', port=9000): Max retries exceeded with url: /exec?query=SHOW+TABLES%3B (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x1045328c0>, 'Connection to qdb2.twocc.in timed out. (connect timeout=5)'))
+2025-06-10 03:18:31 - ibkr_questdb - INFO - Successfully connected to QuestDB
+2025-06-10 03:18:31 - ibapi.client - WARNING - Disconnected; resetting connection
+2025-06-10 03:18:31 - ibkr_questdb - INFO - Connecting to TWS at 103.183.157.114:7497 with client ID 905

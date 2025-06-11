@@ -1,0 +1,27 @@
+{
+  "ticker": {
+    "received_count": 7391,
+    "queue_size": 950,
+    "last_update": 1745407768.193515
+  },
+  "bookTicker": {
+    "received_count": 401695,
+    "queue_size": 1000,
+    "last_update": 1745407768.2385187
+  },
+  "aggTrade": {
+    "received_count": 30176,
+    "queue_size": 999,
+    "last_update": 1745407768.235518
+  },
+  "kline": {
+    "received_count": 10889,
+    "queue_size": 1000,
+    "last_update": 1745407768.2395217
+  },
+  "markPrice": {
+    "received_count": 26727,
+    "queue_size": 928,
+    "last_update": 1745407768.1745129
+  }
+}

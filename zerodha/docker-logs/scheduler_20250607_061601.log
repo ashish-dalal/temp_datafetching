@@ -1,0 +1,67 @@
+2025-06-07 06:16:01,418 - ZerodhaScheduler - INFO - Zerodha Scheduler starting...
+2025-06-07 06:16:01,418 - ZerodhaScheduler - INFO - Current IST time: 2025-06-07 06:16:01
+2025-06-07 06:16:01,418 - ZerodhaScheduler - INFO - === Starting daily cycle ===
+2025-06-07 06:16:01,419 - ZerodhaScheduler - INFO - Current time: 06:16:01
+2025-06-07 06:16:01,419 - ZerodhaScheduler - INFO - Starting token renewal process...
+2025-06-07 06:16:01,419 - ZerodhaScheduler - INFO - Starting listener process...
+2025-06-07 06:16:04,424 - ZerodhaScheduler - INFO - Running token automation...
+2025-06-07 06:16:04,932 - ZerodhaScheduler - INFO - Stopping listener process...
+2025-06-07 06:16:04,968 - ZerodhaScheduler - ERROR - Token automation failed with code 1
+2025-06-07 06:16:04,969 - ZerodhaScheduler - ERROR - Error output: INFO:zerodha_token_automation:Starting Zerodha token automation...
+ERROR:zerodha_token_automation:Automation failed: BrowserType.launch: Target page, context or browser has been closed
+Browser logs:
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ Looks like you launched a headed browser without having a XServer running.                     ║
+║ Set either 'headless: true' or use 'xvfb-run <your-playwright-app>' before running Playwright. ║
+║                                                                                                ║
+║ <3 Playwright Team                                                                             ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+Call log:
+  - <launching> /root/.cache/ms-playwright/chromium-1169/chrome-linux/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DeferRendererTasksAfterInput,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-UDFQIJ --remote-debugging-pipe --no-startup-window
+  - <launched> pid=84
+  - [pid=84][err] [84:99:0607/061604.890050:ERROR:dbus/bus.cc:408] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+  - [pid=84][err] [84:84:0607/061604.892159:ERROR:ui/ozone/platform/x11/ozone_platform_x11.cc:249] Missing X server or $DISPLAY
+  - [pid=84][err] [84:84:0607/061604.892179:ERROR:ui/aura/env.cc:257] The platform failed to initialize.  Exiting.
+
+Traceback (most recent call last):
+  File "/app/zerodha_token_automation.py", line 282, in <module>
+    asyncio.run(main()) 
+  File "/usr/local/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/local/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/app/zerodha_token_automation.py", line 270, in main
+    request_token = await get_request_token()
+  File "/app/zerodha_token_automation.py", line 87, in get_request_token
+    browser = await p.chromium.launch(headless=False)  # Set headless=True in production
+  File "/usr/local/lib/python3.10/site-packages/playwright/async_api/_generated.py", line 14451, in launch
+    await self._impl_obj.launch(
+  File "/usr/local/lib/python3.10/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    Browser, from_channel(await self._channel.send("launch", params))
+  File "/usr/local/lib/python3.10/site-packages/playwright/_impl/_connection.py", line 61, in send
+    return await self._connection.wrap_api_call(
+  File "/usr/local/lib/python3.10/site-packages/playwright/_impl/_connection.py", line 528, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: BrowserType.launch: Target page, context or browser has been closed
+Browser logs:
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ Looks like you launched a headed browser without having a XServer running.                     ║
+║ Set either 'headless: true' or use 'xvfb-run <your-playwright-app>' before running Playwright. ║
+║                                                                                                ║
+║ <3 Playwright Team                                                                             ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+Call log:
+  - <launching> /root/.cache/ms-playwright/chromium-1169/chrome-linux/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DeferRendererTasksAfterInput,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-UDFQIJ --remote-debugging-pipe --no-startup-window
+  - <launched> pid=84
+  - [pid=84][err] [84:99:0607/061604.890050:ERROR:dbus/bus.cc:408] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+  - [pid=84][err] [84:84:0607/061604.892159:ERROR:ui/ozone/platform/x11/ozone_platform_x11.cc:249] Missing X server or $DISPLAY
+  - [pid=84][err] [84:84:0607/061604.892179:ERROR:ui/aura/env.cc:257] The platform failed to initialize.  Exiting.
+
+
+2025-06-07 06:16:04,969 - ZerodhaScheduler - ERROR - Token renewal failed, skipping data collection for today
+2025-06-07 06:16:04,969 - ZerodhaScheduler - INFO - Sleeping until 2025-06-07 08:00:00 (1.7 hours)
+2025-06-07 06:16:18,219 - ZerodhaScheduler - INFO - Received signal 2, shutting down...
+2025-06-07 06:16:58,754 - ZerodhaScheduler - INFO - Received signal 2, shutting down...
+2025-06-07 06:17:04,980 - ZerodhaScheduler - INFO - Zerodha Scheduler stopped

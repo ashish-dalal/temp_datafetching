@@ -1,0 +1,50 @@
+2025-06-07 06:24:34,052 - ZerodhaScheduler - INFO - Zerodha Scheduler starting...
+2025-06-07 06:24:34,053 - ZerodhaScheduler - INFO - Current IST time: 2025-06-07 06:24:34
+2025-06-07 06:24:34,053 - ZerodhaScheduler - INFO - === Starting daily cycle ===
+2025-06-07 06:24:34,053 - ZerodhaScheduler - INFO - Current time: 06:24:34
+2025-06-07 06:24:34,053 - ZerodhaScheduler - INFO - Starting token renewal process...
+2025-06-07 06:24:34,053 - ZerodhaScheduler - INFO - Starting listener process...
+2025-06-07 06:24:37,063 - ZerodhaScheduler - INFO - Running token automation...
+2025-06-07 06:24:47,348 - ZerodhaScheduler - INFO - Stopping listener process...
+2025-06-07 06:24:47,385 - ZerodhaScheduler - ERROR - Token automation failed with code 1
+2025-06-07 06:24:47,386 - ZerodhaScheduler - ERROR - Error output: INFO:zerodha_token_automation:Starting Zerodha token automation...
+INFO:zerodha_token_automation:Navigating to https://kite.trade/connect/login?api_key=n3a1ly52x1d99ntm&v=3
+INFO:zerodha_token_automation:Entering username and password...
+INFO:zerodha_token_automation:Waiting for TOTP input field...
+INFO:zerodha_token_automation:Generated TOTP code: 506038
+INFO:zerodha_token_automation:TOTP entered, waiting for automatic redirect...
+INFO:zerodha_token_automation:Final URL (after TOTP): http://localhost:8080/generate_token?request_token=0q0a52MfYv6hX9NGEWw8GlpqSx78FYSX&action=login&type=login&status=success
+INFO:zerodha_token_automation:Final URL (after waiting for redirect): http://localhost:8080/generate_token?request_token=0q0a52MfYv6hX9NGEWw8GlpqSx78FYSX&action=login&type=login&status=success
+INFO:zerodha_token_automation:Successfully extracted request_token: 0q0a52MfYv6hX9NGEWw8GlpqSx78FYSX
+INFO:zerodha_token_automation:Got request token, generating access token...
+ERROR:zerodha_token_automation:Automation failed: Failed to generate access token: Token is invalid or has expired.
+Traceback (most recent call last):
+  File "/app/zerodha_token_automation.py", line 234, in get_access_token
+    data = kite.generate_session(request_token, api_secret=API_SECRET)
+  File "/usr/local/lib/python3.10/site-packages/kiteconnect/connect.py", line 263, in generate_session
+    resp = self._post("api.token", params={
+  File "/usr/local/lib/python3.10/site-packages/kiteconnect/connect.py", line 865, in _post
+    return self._request(route, "POST", url_args=url_args, params=params, is_json=is_json, query_params=query_params)
+  File "/usr/local/lib/python3.10/site-packages/kiteconnect/connect.py", line 937, in _request
+    raise exp(data["message"], code=r.status_code)
+kiteconnect.exceptions.TokenException: Token is invalid or has expired.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/zerodha_token_automation.py", line 282, in <module>
+    asyncio.run(main()) 
+  File "/usr/local/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/local/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/app/zerodha_token_automation.py", line 272, in main
+    access_token = get_access_token(request_token)
+  File "/app/zerodha_token_automation.py", line 239, in get_access_token
+    raise Exception(f"Failed to generate access token: {str(e)}")
+Exception: Failed to generate access token: Token is invalid or has expired.
+
+2025-06-07 06:24:47,386 - ZerodhaScheduler - INFO - Waiting 55 minutes before starting data collection...
+2025-06-07 06:24:57,743 - ZerodhaScheduler - INFO - Received signal 2, shutting down...
+2025-06-07 06:25:18,909 - ZerodhaScheduler - INFO - Received signal 2, shutting down...
+2025-06-07 06:45:32,834 - ZerodhaScheduler - INFO - Received signal 15, shutting down...
