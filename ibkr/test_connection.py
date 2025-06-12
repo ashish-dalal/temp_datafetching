@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 IBKR Connection Test Script
 Tests connectivity to both IBKR Gateway and QuestDB
@@ -46,22 +47,28 @@ async def test_ibkr_connection():
             
             if qualified:
                 logger.info(f"✅ Contract qualification successful: {qualified[0].symbol} ({qualified[0].conId})")
+                ib.disconnect()
+                return 0  # All good
             else:
                 logger.warning("⚠️ Contract qualification failed")
+                ib.disconnect()
+                return 61  # Contract qualification failed
             
-            ib.disconnect()
-            return True
         else:
             logger.error("❌ IBKR Gateway connection failed")
-            return False
+            return 60  # Connection failed
             
     except Exception as e:
         logger.error(f"❌ IBKR Gateway connection error: {e}")
-        return False
+        return 60  # Connection failed
 
 def test_questdb_connection():
     """Test QuestDB connection"""
     logger.info("🔗 Testing QuestDB connection...")
+    
+    connection_failed = False
+    missing_tables = []
+    push_failures = []
     
     try:
         import requests
@@ -102,41 +109,61 @@ def test_questdb_connection():
                 logger.info(f"✅ Found {len(tables)} tables in QuestDB")
                 
                 # Check for IBKR tables
-                ibkr_tables = [t for t in tables if 'stocks_' in t or 'indices_' in t]
+                required_tables = ['stocks_ticks', 'indices_ticks', 'stocks_candlesticks', 'indices_candlesticks']
+                table_mapping = {
+                    'stocks_ticks': 1,
+                    'indices_ticks': 2,
+                    'stocks_candlesticks': 3,
+                    'indices_candlesticks': 4
+                }
+                
+                ibkr_tables = [t for t in tables if t in required_tables]
                 if ibkr_tables:
                     logger.info(f"✅ IBKR tables found: {', '.join(ibkr_tables)}")
+                    
+                    # Check for missing tables
+                    for table in required_tables:
+                        if table not in tables:
+                            missing_tables.append(table_mapping[table])
+                    
+                    if missing_tables:
+                        logger.warning(f"⚠️ Missing tables: {[t for t in required_tables if t not in tables]}")
                     
                     # Test data push to verify write functionality
                     logger.info("🧪 Testing data push to QuestDB...")
                     test_queries = []
                     
                     if 'stocks_ticks' in ibkr_tables:
-                        test_queries.append(
+                        test_queries.append((
                             "INSERT INTO stocks_ticks (symbol, price, bid, ask, volume, timestamp) "
-                            "VALUES ('TEST_DATA', 0, 0, 0, 0, now());"
-                        )
+                            "VALUES ('TEST_DATA', 0, 0, 0, 0, now());",
+                            1
+                        ))
                     
                     if 'indices_ticks' in ibkr_tables:
-                        test_queries.append(
+                        test_queries.append((
                             "INSERT INTO indices_ticks (symbol, price, bid, ask, volume, timestamp) "
-                            "VALUES ('TEST_DATA', 0, 0, 0, 0, now());"
-                        )
+                            "VALUES ('TEST_DATA', 0, 0, 0, 0, now());",
+                            2
+                        ))
                     
                     if 'stocks_candlesticks' in ibkr_tables:
-                        test_queries.append(
+                        test_queries.append((
                             "INSERT INTO stocks_candlesticks (symbol, timeframe, open, high, low, close, volume, timestamp) "
-                            "VALUES ('TEST_DATA', 'TEST_DATA', 0, 0, 0, 0, 0, now());"
-                        )
+                            "VALUES ('TEST_DATA', 'TEST_DATA', 0, 0, 0, 0, 0, now());",
+                            3
+                        ))
                     
                     if 'indices_candlesticks' in ibkr_tables:
-                        test_queries.append(
+                        test_queries.append((
                             "INSERT INTO indices_candlesticks (symbol, timeframe, open, high, low, close, volume, timestamp) "
-                            "VALUES ('TEST_DATA', 'TEST_DATA', 0, 0, 0, 0, 0, now());"
-                        )
+                            "VALUES ('TEST_DATA', 'TEST_DATA', 0, 0, 0, 0, 0, now());",
+                            4
+                        ))
                     
                     # Execute test inserts
                     successful_inserts = 0
-                    for query in test_queries:
+                    for query, table_id in test_queries:
                         try:
                             test_response = requests.get(
                                 url,
@@ -148,26 +175,51 @@ def test_questdb_connection():
                             if test_response.status_code == 200:
                                 successful_inserts += 1
                             else:
-                                logger.warning(f"⚠️ Test insert failed: {test_response.status_code}")
+                                logger.warning(f"⚠️ Test insert failed for table {table_id}: {test_response.status_code}")
+                                push_failures.append(table_id)
                         except Exception as e:
-                            logger.warning(f"⚠️ Test insert error: {e}")
+                            logger.warning(f"⚠️ Test insert error for table {table_id}: {e}")
+                            push_failures.append(table_id)
                     
                     if successful_inserts > 0:
                         logger.info(f"✅ Successfully pushed test data to {successful_inserts} tables")
-                    else:
+                    
+                    if len(push_failures) == len(test_queries) and test_queries:
                         logger.warning("⚠️ Failed to push test data to any tables")
                         
                 else:
-                    logger.warning("⚠️ No IBKR tables found - run create_tables.py first")
+                    logger.warning("⚠️ No IBKR tables found")
+                    missing_tables = [1, 2, 3, 4]  # All tables missing
             
-            return True
         else:
             logger.error(f"❌ QuestDB connection failed: {response.status_code}")
-            return False
+            connection_failed = True
             
     except Exception as e:
         logger.error(f"❌ QuestDB connection error: {e}")
-        return False
+        connection_failed = True
+    
+    # Calculate return code
+    if connection_failed:
+        return 10
+    
+    if missing_tables:
+        if len(missing_tables) == 4:
+            return 20  # No tables exist
+        else:
+            # Build code like 21, 212, 2134 etc.
+            code_str = "2" + "".join(map(str, sorted(missing_tables)))
+            return int(code_str)
+    
+    if push_failures:
+        if len(push_failures) == len([t for t in ['stocks_ticks', 'indices_ticks', 'stocks_candlesticks', 'indices_candlesticks'] if t in ibkr_tables]):
+            return 30  # Failed to push to any table
+        else:
+            # Build code like 31, 312, 3134 etc.
+            code_str = "3" + "".join(map(str, sorted(push_failures)))
+            return int(code_str)
+    
+    return 0  # All tests passed
 
 def test_configuration():
     """Test configuration and environment setup"""
@@ -185,7 +237,7 @@ def test_configuration():
     
     if missing_vars:
         logger.error(f"❌ Missing environment variables: {', '.join(missing_vars)}")
-        return False
+        return 50  # Missing environment variables
     
     logger.info("✅ All required environment variables are set")
     
@@ -193,7 +245,7 @@ def test_configuration():
     tickers_file = Path(__file__).resolve().parent / 'IBKR_TICKERS.json'
     if not tickers_file.exists():
         logger.error("❌ IBKR_TICKERS.json file not found")
-        return False
+        return 51  # IBKR_TICKERS.json not found
     
     try:
         with open(tickers_file, 'r') as f:
@@ -201,6 +253,7 @@ def test_configuration():
         
         if not tickers:
             logger.warning("⚠️ IBKR_TICKERS.json is empty")
+            return 52  # IBKR_TICKERS.json empty/invalid
         else:
             logger.info(f"✅ Loaded {len(tickers)} symbols from IBKR_TICKERS.json")
             
@@ -212,11 +265,11 @@ def test_configuration():
                 sec_type = ticker.get('secType', 'N/A')
                 logger.info(f"   📊 {symbol} ({sec_type})")
         
-        return True
+        return 0  # All good
         
     except Exception as e:
         logger.error(f"❌ Error reading IBKR_TICKERS.json: {e}")
-        return False
+        return 52  # IBKR_TICKERS.json empty/invalid
 
 async def main():
     """Run all connection tests"""
@@ -224,25 +277,25 @@ async def main():
     logger.info("=" * 50)
     
     # Test configuration
-    config_ok = test_configuration()
+    config_result = test_configuration()
     print()
     
     # Test QuestDB
-    questdb_ok = test_questdb_connection()
+    questdb_result = test_questdb_connection()
     print()
     
     # Test IBKR Gateway
-    ibkr_ok = await test_ibkr_connection()
+    ibkr_result = await test_ibkr_connection()
     print()
     
     # Summary
     logger.info("📋 Test Summary")
     logger.info("=" * 50)
-    logger.info(f"Configuration: {'✅ PASS' if config_ok else '❌ FAIL'}")
-    logger.info(f"QuestDB:       {'✅ PASS' if questdb_ok else '❌ FAIL'}")
-    logger.info(f"IBKR Gateway:  {'✅ PASS' if ibkr_ok else '❌ FAIL'}")
+    logger.info(f"Configuration: {'✅ PASS' if config_result == 0 else f'❌ FAIL (code: {config_result})'}")
+    logger.info(f"QuestDB:       {'✅ PASS' if questdb_result == 0 else f'❌ FAIL (code: {questdb_result})'}")
+    logger.info(f"IBKR Gateway:  {'✅ PASS' if ibkr_result == 0 else f'❌ FAIL (code: {ibkr_result})'}")
     
-    if all([config_ok, questdb_ok, ibkr_ok]):
+    if all([config_result == 0, questdb_result == 0, ibkr_result == 0]):
         logger.info("\n🎉 All tests passed! System is ready to run.")
         logger.info("Start the connector with: python run_connector.py")
         return 0

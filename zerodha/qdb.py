@@ -46,7 +46,7 @@ class QuestDBClient:
             
         # Construct the connection string
         self.conf = (
-            f"http::addr={self.host}:{self.port};"
+            f"https::addr={self.host}:{self.port};"
             f"username={self.user};"
             f"password={self.password};"
         )
@@ -65,7 +65,7 @@ class QuestDBClient:
             return True
         except Exception as e:
             logger.error(f"Failed to connect to QuestDB: {e}")
-            logger.error(f"Connection string: http::addr={self.host}:{self.port};username={self.user};password=***")
+            logger.error(f"Connection string: https::addr={self.host}:{self.port};username={self.user};password=***")
             self.connected = False
             return False
 

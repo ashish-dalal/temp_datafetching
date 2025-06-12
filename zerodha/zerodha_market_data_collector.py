@@ -109,7 +109,7 @@ class MarketDataCollector:
             f"username={self.username};"
             f"password={self.password};"
         )
-        self.questdb_url = f"http://{self.host}:9000/exec"
+        self.questdb_url = f"https://{self.host}:9000/exec"
         self.queues: Dict[str, asyncio.Queue] = {
             stream_type: asyncio.Queue(maxsize=BATCH_CONFIGS[stream_type]['size'] * 2)
             for stream_type in self.stream_types

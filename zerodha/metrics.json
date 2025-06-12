@@ -1,11 +1,12 @@
 {
-  "last_updated": "2025-06-03T00:38:06.968676",
-  "last_updated_timestamp": 1748891286,
+  "last_updated": "2025-06-12T11:58:11.611103",
+  "last_updated_timestamp": 1749709691,
   "stream_type": "full",
-  "events_processed": 14,
+  "events_processed": 0,
   "queue_size": 0,
-  "status": "active",
+  "status": "stopped",
   "last_symbol": "PERIODIC",
   "start_time": "2025-05-02T16:51:02.616714",
-  "uptime_seconds": 2706424
+  "uptime_seconds": 3524826,
+  "processing_rate": 0.0
 }

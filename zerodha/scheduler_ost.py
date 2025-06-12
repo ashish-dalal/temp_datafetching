@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# NOTE: THIS IS FOR THE DOCKER METHOD
+# NOTE: THIS IS FOR `./orchestrator.py`
 """
-Zerodha Trading Scheduler
+Zerodha Trading Scheduler for Orchestrator
 Manages daily token renewal and data collection cycles for Indian market hours.
 Market Hours: 9:15 AM - 3:30 PM
 Data Collection: 9:10 AM - 3:35 PM (5 min buffer on each side)
@@ -65,7 +65,7 @@ class ZerodhaScheduler:
     def _setup_logging(self):
         """Setup logging with file and console handlers."""
         # Create logs directory
-        log_dir = Path("/app/logs")
+        log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
         
         # Setup logger
@@ -73,7 +73,7 @@ class ZerodhaScheduler:
         logger.setLevel(logging.INFO)
         
         # File handler
-        log_file = log_dir / f"scheduler_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        log_file = log_dir / f"zerodha_scheduler_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -97,7 +97,6 @@ class ZerodhaScheduler:
         if self.current_process:
             try:
                 self.logger.info("Allowing current batch to complete before shutdown...")
-                # Give process some time to complete current batch
                 asyncio.create_task(self._graceful_process_stop())
             except:
                 pass
@@ -150,11 +149,12 @@ class ZerodhaScheduler:
             try:
                 # Step 1: Start listener in background
                 self.logger.info("Starting listener process...")
+                zerodha_path = Path(__file__).parent
                 listener_process = subprocess.Popen(
                     [sys.executable, "listner.py"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    cwd="/app"
+                    cwd=str(zerodha_path)
                 )
                 
                 # Wait a moment for listener to start
@@ -166,7 +166,7 @@ class ZerodhaScheduler:
                     [sys.executable, "zerodha_token_automation.py"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    cwd="/app"
+                    cwd=str(zerodha_path)
                 )
                 
                 # Wait for token automation to complete
@@ -221,11 +221,12 @@ class ZerodhaScheduler:
         
         try:
             # Start zerodha connector
+            zerodha_path = Path(__file__).parent
             self.current_process = subprocess.Popen(
                 [sys.executable, "zerodha_run_connector.py"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                cwd="/app"
+                cwd=str(zerodha_path)
             )
             
             # Calculate end time
