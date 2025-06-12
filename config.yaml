@@ -1,3 +1,4 @@
+# NOTE: THIS IS FOR scheduler scripts for both `orchestrator.py` and Docker method
 # Process termination settings
 timeouts:
   process_shutdown: 15      # Seconds to wait for graceful shutdown before force kill
@@ -15,9 +16,9 @@ scheduling:
 # Script file paths
 paths:
   binance_script: "binance/run_connector.py"
-  zerodha_script: "zerodha/zerodha_run_connector.py" 
-  listener_script: "zerodha/listner.py"
-  token_script: "zerodha/zerodha_token_automation.py"
+  zerodha_script: "zerodha/scheduler.py" 
+  ibkr_script: "ibkr/scheduler.py"
+  ibkr_create_tables_script: "ibkr/create_tables.py"
   
 # Logging configuration
 logging:
@@ -28,3 +29,19 @@ logging:
 health:
   check_interval: 30        # Seconds between process health checks
   memory_limit_mb: 2048     # Memory limit per process before restart warning
+
+# IBKR configuration
+ibkr:
+  market_start_time: "19:20"  # 7:20 PM IST
+  market_end_time: "01:35"    # 1:35 AM IST
+  connection_retry_delay: 5   # Seconds to wait before retry
+  max_retries: 2              # Maximum connection retry attempts
+  pre_market_check_minutes: 5 # (in mins) buffer before market opens to perform qdb checks
+
+# Zerodha configuration
+zerodha:
+  token_renewal_time: "08:00"  # 8:00 AM IST
+  data_start_time: "09:10"     # 9:10 AM IST
+  data_end_time: "15:35"       # 3:35 PM IST
+  market_start_time: "09:15"   # 9:15 AM IST
+  market_end_time: "15:30"     # 3:30 PM IST

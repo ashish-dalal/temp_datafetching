@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# NOTE: THIS CODE IS FOR DOCKER CONTAINERS
 # Server Setup Script for Data pipeline
 # This script installs Docker/Docker Compose on a new server, clones the repo, then runs run.sh
 

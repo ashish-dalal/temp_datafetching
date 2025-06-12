@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# NOTE: THIS CODE IS FOR DOCKER CONTAINERS
 # Zerodha & Binance Trading System Setup Script
 echo "Setting up Zerodha & Binance Trading System..."
 

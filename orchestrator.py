@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Financial Data Orchestrator
-Manages Binance and Zerodha connectors with automatic token renewal.
+Simple process manager for Binance, Zerodha, and IBKR connectors.
+Each connector handles its own scheduling internally.
 """
 
 import asyncio
@@ -15,7 +16,7 @@ import psutil
 import yaml
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
 from logging.handlers import RotatingFileHandler
 
 
@@ -125,132 +126,6 @@ class ProcessManager:
         return time.time() - self.start_time
 
 
-class TokenRenewalManager:
-    """Manages the token renewal workflow."""
-    
-    def __init__(self, config: Dict):
-        self.config = config
-        self.logger = logging.getLogger("TokenRenewalManager")
-        self.listener_process: Optional[subprocess.Popen] = None
-        
-    async def renew_token(self) -> bool:
-        """Execute the complete token renewal workflow."""
-        try:
-            self.logger.info("Starting token renewal process")
-            
-            # Step 1: Start listener.py in background
-            if not await self._start_listener():
-                return False
-            
-            # Step 2: Run token automation and wait for completion
-            if not await self._run_token_automation():
-                await self._stop_listener()
-                return False
-            
-            # Step 3: Stop listener
-            await self._stop_listener()
-            
-            # Step 4: Wait for validation
-            await asyncio.sleep(self.config['timeouts']['token_validation'])
-            
-            self.logger.info("Token renewal completed successfully")
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"Token renewal failed: {e}")
-            await self._stop_listener()
-            return False
-    
-    async def _start_listener(self) -> bool:
-        """Start the listener process."""
-        try:
-            self.logger.info("Starting listener process")
-            self.listener_process = subprocess.Popen(
-                [sys.executable, self.config['paths']['listener_script']],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=os.getcwd(),
-                text=True
-            )
-            
-            # Wait briefly to ensure it started
-            await asyncio.sleep(2)
-            
-            if self.listener_process.poll() is None:
-                self.logger.info(f"Listener started successfully (PID: {self.listener_process.pid})")
-                return True
-            else:
-                self.logger.error("Listener failed to start")
-                return False
-                
-        except Exception as e:
-            self.logger.error(f"Failed to start listener: {e}")
-            return False
-    
-    async def _run_token_automation(self) -> bool:
-        """Run token automation script and wait for completion."""
-        try:
-            self.logger.info("Running token automation")
-            process = subprocess.Popen(
-                [sys.executable, self.config['paths']['token_script']],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=os.getcwd(),
-                text=True
-            )
-            
-            # Wait for completion
-            stdout, stderr = process.communicate()
-            
-            # if process.returncode == 0:
-            #     self.logger.info("Token automation completed successfully")
-            #     return True
-            # else:
-            #     self.logger.error(f"Token automation failed with code {process.returncode}")
-            #     self.logger.error(f"STDERR: {stderr}")
-            #     return False
-
-            # TEMPORARY: Always consider token automation successful for testing
-            self.logger.info(f"Token automation finished with code {process.returncode}")
-            if stderr:
-                self.logger.warning(f"STDERR: {stderr}")
-            self.logger.info("Token automation completed (ignoring exit code for testing)")
-            return True
-
-        except Exception as e:
-            self.logger.error(f"Failed to run token automation: {e}")
-            return False
-    
-    async def _stop_listener(self):
-        """Stop the listener process."""
-        if not self.listener_process:
-            return
-            
-        try:
-            self.logger.info("Stopping listener process")
-            self.listener_process.terminate()
-            
-            # Wait for graceful shutdown
-            try:
-                await asyncio.wait_for(self._wait_for_listener_exit(), timeout=10)
-                self.logger.info("Listener stopped gracefully")
-            except asyncio.TimeoutError:
-                self.logger.warning("Listener didn't stop gracefully, force killing")
-                self.listener_process.kill()
-                await self._wait_for_listener_exit()
-                self.logger.info("Listener force killed")
-                
-        except Exception as e:
-            self.logger.error(f"Error stopping listener: {e}")
-        finally:
-            self.listener_process = None
-    
-    async def _wait_for_listener_exit(self):
-        """Wait for listener process to exit."""
-        while self.listener_process and self.listener_process.poll() is None:
-            await asyncio.sleep(0.1)
-
-
 class HealthMonitor:
     """Monitors process health and system resources."""
     
@@ -288,25 +163,26 @@ class HealthMonitor:
 
 
 class DataOrchestrator:
-    """Main orchestrator for managing all processes and workflows."""
+    """Main orchestrator for managing all processes."""
     
     def __init__(self, config_path: str = "config.yaml"):
         self.config = self._load_config(config_path)
         self.logger = self._setup_logging()
         
-        # Initialize managers
+        # Initialize process managers
         self.binance_manager = ProcessManager(
             "binance", self.config['paths']['binance_script'], self.config
         )
         self.zerodha_manager = ProcessManager(
             "zerodha", self.config['paths']['zerodha_script'], self.config
         )
-        self.token_manager = TokenRenewalManager(self.config)
+        self.ibkr_manager = ProcessManager(
+            "ibkr", self.config['paths']['ibkr_script'], self.config
+        )
         self.health_monitor = HealthMonitor(self.config)
         
         # State tracking
         self.running = False
-        self.last_renewal_time = 0
         self.shutdown_event = asyncio.Event()
         
         # Setup signal handlers
@@ -330,7 +206,7 @@ class DataOrchestrator:
         
         # Create log filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir / f"run_log_{timestamp}.log"
+        log_file = log_dir / f"orchestrator_{timestamp}.log"
         
         # Set the root logger level so ALL loggers inherit it
         logging.getLogger().setLevel(getattr(logging, self.config['logging']['level']))
@@ -396,6 +272,7 @@ class DataOrchestrator:
             # Stop processes
             await self.binance_manager.stop(self.config['timeouts']['process_shutdown'])
             await self.zerodha_manager.stop(self.config['timeouts']['process_shutdown'])
+            await self.ibkr_manager.stop(self.config['timeouts']['process_shutdown'])
             
             self.logger.info("All processes stopped successfully")
             self.shutdown_event.set()
@@ -410,7 +287,7 @@ class DataOrchestrator:
         self.logger.error("Shutdown timeout reached! Force killing all processes...")
         
         # Force kill processes
-        for manager in [self.binance_manager, self.zerodha_manager]:
+        for manager in [self.binance_manager, self.zerodha_manager, self.ibkr_manager]:
             if manager.process and manager.is_alive():
                 try:
                     manager.process.kill()
@@ -420,37 +297,23 @@ class DataOrchestrator:
         
         self.shutdown_event.set()
     
-    async def _validate_config(self):
-        """TODO: Validate configuration file structure and values."""
-        pass
-    
     async def run(self):
         """Main orchestrator loop."""
         try:
             self.logger.info("Starting Data Orchestrator")
             self.running = True
             
-            # Start initial token renewal
-            self.logger.info("Performing initial token renewal...")
-            renewal_success = await self._perform_token_renewal_with_retry()
-            
-            if not renewal_success:
-                self.logger.error("Initial token renewal failed, exiting...")
-                return
-            
-            # Start connectors
+            # Start all connectors
             await self._start_connectors()
             
-            # Start monitoring tasks
+            # Start monitoring task
             health_task = asyncio.create_task(self._health_monitoring_loop())
-            renewal_task = asyncio.create_task(self._renewal_scheduling_loop())
             
             # Wait for shutdown
             await self.shutdown_event.wait()
             
             # Cleanup
             health_task.cancel()
-            renewal_task.cancel()
             
             self.logger.info("Data Orchestrator stopped")
             
@@ -459,86 +322,29 @@ class DataOrchestrator:
             raise
     
     async def _start_connectors(self):
-        """Start both connector processes."""
+        """Start all connector processes."""
         # Start binance connector (runs continuously)
         binance_started = await self.binance_manager.start()
         if not binance_started:
             self.logger.error("Failed to start Binance connector")
-            return False
+        else:
+            self.logger.info("Binance connector started successfully")
         
-        # Start zerodha connector 
+        # Start zerodha scheduler (handles its own timing)
         zerodha_started = await self.zerodha_manager.start()
         if not zerodha_started:
-            self.logger.error("Failed to start Zerodha connector")
-            return False
+            self.logger.error("Failed to start Zerodha scheduler")
+        else:
+            self.logger.info("Zerodha scheduler started successfully")
         
-        self.logger.info("All connectors started successfully")
-        return True
-    
-    async def _perform_token_renewal_with_retry(self) -> bool:
-        """Perform token renewal with retry logic."""
-        max_attempts = self.config['retry']['max_attempts']
+        # Start IBKR scheduler (handles its own timing)
+        ibkr_started = await self.ibkr_manager.start()
+        if not ibkr_started:
+            self.logger.error("Failed to start IBKR scheduler")
+        else:
+            self.logger.info("IBKR scheduler started successfully")
         
-        for attempt in range(1, max_attempts + 1):
-            self.logger.info(f"Token renewal attempt {attempt}/{max_attempts}")
-            
-            success = await self.token_manager.renew_token()
-            if success:
-                self.last_renewal_time = time.time()
-                self.logger.info("Token renewal successful")
-                return True
-            
-            if attempt < max_attempts:
-                wait_time = min(attempt * 2, 30)  # Exponential backoff, max 30s
-                self.logger.warning(f"Token renewal failed, retrying in {wait_time}s...")
-                await asyncio.sleep(wait_time)
-        
-        self.logger.error("All token renewal attempts failed")
-        return False
-    
-    async def _renewal_scheduling_loop(self):
-        """Main loop for scheduling token renewals."""
-        while self.running:
-            try:
-                # Calculate time until next renewal
-                current_time = time.time()
-                next_renewal = self.last_renewal_time + self.config['scheduling']['renewal_cycle']
-                sleep_time = next_renewal - current_time
-                
-                if sleep_time > 0:
-                    self.logger.info(f"Next token renewal in {sleep_time/3600:.1f} hours")
-                    await asyncio.sleep(sleep_time)
-                
-                if not self.running:
-                    break
-                
-                # Stop zerodha connector
-                self.logger.info("Stopping Zerodha connector for token renewal")
-                await self.zerodha_manager.stop(self.config['timeouts']['process_shutdown'])
-                
-                # Perform token renewal
-                renewal_success = await self._perform_token_renewal_with_retry()
-                
-                if renewal_success:
-                    # Restart zerodha connector
-                    self.logger.info("Restarting Zerodha connector")
-                    await self.zerodha_manager.start()
-                else:
-                    # Start urgent alert loop
-                    asyncio.create_task(self._urgent_alert_loop())
-                
-            except Exception as e:
-                self.logger.error(f"Error in renewal scheduling: {e}")
-                await asyncio.sleep(60)  # Wait before retrying
-    
-    async def _urgent_alert_loop(self):
-        """Print urgent alerts when token renewal fails."""
-        alert_interval = self.config['retry']['urgent_alert_interval']
-        
-        while self.running:
-            self.logger.error("URGENT: Token renewal failed! Manual intervention required!")
-            print("🚨 URGENT ALERT: Token renewal failed! Manual intervention required! 🚨")
-            await asyncio.sleep(alert_interval)
+        self.logger.info("All connectors startup attempted")
     
     async def _health_monitoring_loop(self):
         """Monitor health of all processes."""
@@ -547,19 +353,25 @@ class DataOrchestrator:
         while self.running:
             try:
                 # Check Binance connector health
-                await self.health_monitor.check_process_health(self.binance_manager)
-                
-                # Restart if dead (only if not during renewal)
-                if not self.binance_manager.is_alive():
+                if self.binance_manager.is_alive():
+                    await self.health_monitor.check_process_health(self.binance_manager)
+                else:
                     self.logger.warning("Binance connector died, restarting...")
                     await self.binance_manager.start()
                 
-                # Check Zerodha connector health (only if should be running)
+                # Check Zerodha scheduler health  
                 if self.zerodha_manager.is_alive():
                     await self.health_monitor.check_process_health(self.zerodha_manager)
-                elif time.time() - self.last_renewal_time > 300:  # Give 5 min after renewal
-                    self.logger.warning("Zerodha connector died, restarting...")
+                else:
+                    self.logger.warning("Zerodha scheduler died, restarting...")
                     await self.zerodha_manager.start()
+                
+                # Check IBKR scheduler health
+                if self.ibkr_manager.is_alive():
+                    await self.health_monitor.check_process_health(self.ibkr_manager)
+                else:
+                    self.logger.warning("IBKR scheduler died, restarting...")
+                    await self.ibkr_manager.start()
                 
                 await asyncio.sleep(check_interval)
                 
